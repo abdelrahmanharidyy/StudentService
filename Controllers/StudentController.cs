@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StudentDAL;
+using StudentDAL.Interfaces;
 
 namespace StudentService.Controllers
 {
@@ -7,13 +8,11 @@ namespace StudentService.Controllers
     [Route("api/[controller]")]
     public class StudentController : Controller
     {
-        private readonly StudentDAL.StudentDAL _studentDal;
-        //readonly: get intialized only once, cannot be reassigned
-        //private readonly StudentDAL.StudentDAL studentDAL;
+        private readonly IStudentRepository _studentRepo;
 
-        public StudentController(StudentDAL.StudentDAL studentDAL)
+        public StudentController(IStudentRepository studentRepository)
         {
-            this._studentDal = studentDAL;
+            _studentRepo = studentRepository;
         }
 
         [HttpGet("GetAll")]
@@ -29,35 +28,35 @@ namespace StudentService.Controllers
          */
         public IActionResult GetAllStudents()
         {
-            var students = _studentDal.GetAllStudents();
+            var students = _studentRepo.GetAllStudents();
             return Ok(students);
         }
 
         [HttpPost("Add")]
         public IActionResult AddStudent([FromBody] Student student)
         {
-            _studentDal.InsertStudent(student);
+            _studentRepo.InsertStudent(student);
             return Ok("Student added");
         }
 
         [HttpPut("Update")]
         public IActionResult UpdateStudent([FromBody] Student student)
         {
-            _studentDal.UpdateStudent(student);
+            _studentRepo.UpdateStudent(student);
             return Ok("Student updated");
         }
 
         [HttpDelete("Delete/{id}")]
         public IActionResult DeleteStudent(int id)
         {
-            _studentDal.DeleteStudent(id);
+            _studentRepo.DeleteStudent(id);
             return Ok("Student deleted");
         }
 
         [HttpGet("CheckExists/{nationalId}")]
         public IActionResult CheckExists(string nationalId)
         {
-            bool exists = _studentDal.CheckStudentExists(nationalId);
+            bool exists = _studentRepo.CheckStudentExists(nationalId);
             return Ok(exists);
         }
     }

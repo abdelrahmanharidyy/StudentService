@@ -1,17 +1,27 @@
+using StudentDAL;
+using StudentDAL.Interfaces;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Read connection string
 string connStr = builder.Configuration.GetConnectionString("MyConnection");
-// Add services to the container.
 
-builder.Services.AddSingleton(new StudentDAL.StudentDAL(connStr));
-builder.Services.AddControllers();
+// Register repositories with interfaces (better for abstraction and testing)
+builder.Services.AddScoped<ICollegeRepository>(provider =>
+    new CollegeRepository(connStr));
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddScoped<IStudentRepository>(provider =>
+    new StudentRepository(connStr));
+
+
+// Add controllers and Swagger
+builder.Services.AddControllers().AddXmlSerializerFormatters();// Return xml
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -19,9 +29,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
