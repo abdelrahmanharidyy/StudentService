@@ -1,7 +1,7 @@
 ﻿
 using Microsoft.AspNetCore.Mvc;
 using StudentDAL.Interfaces;
-
+using StudentDAL.Models;
 namespace CollegeService.Controllers
 {
     [ApiController]

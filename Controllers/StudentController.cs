@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StudentDAL;
 using StudentDAL.Interfaces;
+using StudentDAL.Models;
 
 namespace StudentService.Controllers
 {
@@ -15,22 +16,29 @@ namespace StudentService.Controllers
             _studentRepo = studentRepository;
         }
 
-        [HttpGet("GetAll")]
+
         /*
             IActionResult is interface that represents the result of an action method can return:
-                OK() 200
-                NotFound() 404
-                BadRequest() 400
+                OK() 200 , Created () 201 
+                BadRequest() 400 , Unauthorized() 401, Forbidden() 403 , NotFound() 404 
+                ServerError() 500
                 View();
                 Json()
                 File()
                 ETC....
          */
-        public IActionResult GetAllStudents()
+        [HttpGet("GetAll")]
+        public IActionResult GetAllStudents([FromQuery] string? nationalId = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            var students = _studentRepo.GetAllStudents();
+            int startRow = ((page - 1) * pageSize) + 1;
+            int endRow = page * pageSize;
+
+            var students = _studentRepo.GetAllStudents(nationalId, startRow, endRow);
+
             return Ok(students);
         }
+
+
 
         [HttpPost("Add")]
         public IActionResult AddStudent([FromBody] Student student)

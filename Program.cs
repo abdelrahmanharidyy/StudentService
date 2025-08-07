@@ -1,6 +1,7 @@
 using StudentDAL;
 using StudentDAL.Interfaces;
-
+using AspNetCoreRateLimit;
+using Microsoft.Extensions.DependencyInjection;
 var builder = WebApplication.CreateBuilder(args);
 
 // Read connection string
@@ -12,7 +13,20 @@ builder.Services.AddScoped<ICollegeRepository>(provider =>
 
 builder.Services.AddScoped<IStudentRepository>(provider =>
     new StudentRepository(connStr));
+//Rate limit prevent "DDos Attack":
 
+builder.Services.AddMemoryCache();
+
+builder.Services.Configure<IpRateLimitOptions>(
+    builder.Configuration.GetSection("IpRateLimiting"));
+
+
+
+builder.Services.AddMemoryCache();
+builder.Services.AddInMemoryRateLimiting();
+builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+builder.Services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+builder.Services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
 
 // Add controllers and Swagger
 builder.Services.AddControllers().AddXmlSerializerFormatters();// Return xml
@@ -32,3 +46,4 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
+app.UseIpRateLimiting();
